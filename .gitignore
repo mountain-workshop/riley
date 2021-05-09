@@ -1,4 +1,5 @@
 /discord-house-cup
+.envrc
 
 # Output of the go coverage tool
 *.out
