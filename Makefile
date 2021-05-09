@@ -9,7 +9,6 @@ VERSION := "local-dev"
 
 all: lint test
 docker: build-docker run-docker
-run: build run-local
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v
 lint:
@@ -34,5 +33,5 @@ build-docker:
 	docker build --build-arg version=$(VERSION) --build-arg commit=$(COMMIT) -t quay.io/sudermanjr/$(BINARY_NAME):dev .
 run-docker:
 	docker run --rm -p 4004:4004 --env DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} --env DISCORD_GUILD_ID=${DISCORD_GUILD_ID} quay.io/sudermanjr/$(BINARY_NAME):dev server
-run-local:
-	go run main.go server --token ${DISCORD_BOT_TOKEN} --guild ${DISCORD_GUILD_ID}
+run:
+	go run main.go server --token ${DISCORD_BOT_TOKEN} --guild ${DISCORD_GUILD_ID} -v10 -c

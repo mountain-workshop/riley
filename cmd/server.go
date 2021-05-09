@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -8,19 +9,24 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/klog"
 
 	"git.iratepublik.com/sudermans/discord-house-cup/pkg/bot"
 )
 
-var s *discordgo.Session
-var token string
-var guild string
+var (
+	s             *discordgo.Session
+	token         string
+	guild         string
+	cleanupOnExit bool
+)
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
 	serverCmd.PersistentFlags().StringVar(&token, "token", "", "Bot access token")
 	serverCmd.PersistentFlags().StringVar(&guild, "guild", "", "Test guild ID. If not passed - bot registers commands globally")
+	serverCmd.PersistentFlags().BoolVarP(&cleanupOnExit, "cleanup-on-exit", "c", false, "If true, when the server shuts down, it will delete all slash commands assocated with the bot.")
 
 	envMap := map[string]string{
 		"DISCORD_BOT_TOKEN": "token",
@@ -41,6 +47,9 @@ func init() {
 			}
 		}
 	}
+	klog.InitFlags(nil)
+	flag.Parse()
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 }
 
 // serverCmd represents the server command
@@ -62,27 +71,56 @@ var serverCmd = &cobra.Command{
 		})
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("server called")
 		s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-			log.Println("Bot is up!")
+			klog.Infof("Bot is up!")
 		})
 		err := s.Open()
 		if err != nil {
 			klog.Fatalf("Cannot open the session: %v", err)
 		}
 
-		for _, v := range bot.Commands {
-			_, err := s.ApplicationCommandCreate(s.State.User.ID, guild, v)
-			if err != nil {
-				klog.Fatalf("Cannot create '%v' command: %v", v.Name, err)
-			}
-		}
-
 		defer s.Close()
 
+		if err := registerCommands(); err != nil {
+			klog.Error(err)
+		}
 		stop := make(chan os.Signal)
 		signal.Notify(stop, os.Interrupt)
 		<-stop
-		log.Println("Gracefully shutting down...")
+		klog.Info("Gracefully shutting down...")
+		if cleanupOnExit {
+			if err := removeAllCommands(); err != nil {
+				klog.Error(err)
+			}
+		}
 	},
+}
+
+func registerCommands() error {
+	klog.Info("registering commands")
+	for _, v := range bot.Commands {
+		_, err := s.ApplicationCommandCreate(s.State.User.ID, guild, v)
+		if err != nil {
+			return fmt.Errorf("Cannot create '%v' command: %v", v.Name, err)
+		}
+	}
+	return nil
+}
+
+func removeAllCommands() error {
+	klog.Info("deleting all commands")
+	commands, err := s.ApplicationCommands(s.State.User.ID, guild)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range commands {
+		klog.Infof("deleting command %s", c.Name)
+		err := s.ApplicationCommandDelete(s.State.User.ID, guild, c.ID)
+		if err != nil {
+			klog.Errorf("Cannot delete '%v' command: %v", c.Name, err)
+		}
+	}
+
+	return nil
 }
