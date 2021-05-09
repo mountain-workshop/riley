@@ -1,0 +1,71 @@
+---
+kind: pipeline
+type: kubernetes
+name: default
+
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    registry: quay.io
+    username:
+      from_secret: quay_user
+    password:
+      from_secret: quay_token
+    repo: quay.io/sudermanjr/discord-house-cup
+    tags:
+      - ${DRONE_TAG}
+      - ${DRONE_COMMIT_SHA}
+  when:
+    ref:
+    - refs/tags/*
+
+- name: gitea_release
+  image: plugins/gitea-release
+  settings:
+    base_url: https://git.iratepublik.com
+    api_key:
+      from_secret: gitea_token
+    title: ${DRONE_TAG}
+    note: ${DRONE_TAG}
+  when:
+    ref:
+    - refs/tags/*
+
+- name: helm-lint
+  image: quay.io/sudermanjr/utilities:2.0
+  commands:
+  - helm lint charts/discord-house-cup --strict
+  when:
+    branch:
+      exclude:
+      - master
+    ref:
+      exclude:
+      - refs/tags/**
+
+- name: go-test
+  image: golang:1.16
+  commands:
+  - make test
+  when:
+    branch:
+      exclude:
+      - master
+    ref:
+      exclude:
+      - refs/tags/**
+
+- name: helm-deploy
+  image: quay.io/sudermanjr/utilities:2.0
+  commands:
+  - helm upgrade --install discord-house-cup charts/discord-house-cup --namespace dhc --create-namespace --set image.tag=${DRONE_COMMIT_SHA}
+  when:
+    ref:
+    - refs/tags/*
+
+trigger:
+  event:
+  - push
+  - tag
+
