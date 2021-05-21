@@ -3,9 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
-	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/cobra"
@@ -20,19 +18,37 @@ var (
 	token         string
 	guild         string
 	cleanupOnExit bool
+	dbUser        string
+	dbPassword    string
+	dbHost        string
+	dbName        string
+	dbPort        int
+	dbSSLMode     string
 )
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
 	serverCmd.PersistentFlags().StringVar(&token, "token", "", "Bot access token")
 	serverCmd.PersistentFlags().StringVar(&guild, "guild", "", "Test guild ID. If not passed - bot registers commands globally")
-	serverCmd.PersistentFlags().BoolVarP(&cleanupOnExit, "cleanup-on-exit", "c", false, "If true, when the server shuts down, it will delete all slash commands assocated with the bot.")
+	serverCmd.PersistentFlags().BoolVarP(&cleanupOnExit, "cleanup-on-exit", "c", true, "If true, when the server shuts down, it will delete all slash commands assocated with the bot.")
+
+	serverCmd.PersistentFlags().StringVar(&dbUser, "db-user", "discordhousecup", "The postgres database user.")
+	serverCmd.PersistentFlags().StringVar(&dbPassword, "db-password", "", "The password for the postgres database")
+	serverCmd.PersistentFlags().StringVar(&dbHost, "db-host", "", "The database host")
+	serverCmd.PersistentFlags().StringVar(&dbName, "db-name", "", "The database name")
+	serverCmd.PersistentFlags().IntVar(&dbPort, "db-port", 5432, "The port to connect to the database on")
+	serverCmd.PersistentFlags().StringVar(&dbSSLMode, "db-ssl-mode", "require", "The database ssl mode")
 
 	envMap := map[string]string{
-		"DISCORD_BOT_TOKEN": "token",
-		"DISCORD_GUILD_ID":  "guild",
+		"DISCORD_BOT_TOKEN":       "token",
+		"DISCORD_GUILD_ID":        "guild",
+		"DISCORD_BOT_DB_USER":     "db-user",
+		"DISCORD_BOT_DB_PASSWORD": "db-password",
+		"DISCORD_BOT_DB_HOST":     "db-host",
+		"DISCORD_BOT_DB_NAME":     "db-name",
+		"DISCORD_BOT_DB_PORT":     "db-port",
+		"DISCORD_BOT_SSL_MODE":    "db-ssl-mode",
 	}
-
 	for env, flagName := range envMap {
 		flag := serverCmd.PersistentFlags().Lookup(flagName)
 		if flag == nil {
@@ -57,70 +73,28 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run the discord bot server.",
 	Long:  `Run the discord bot server`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRunE: func(cmd *cobra.Command, args []string) error {
 		var err error
+		err = bot.InitDatabase(dbHost, dbUser, dbPassword, dbName, dbSSLMode, dbPort)
+		if err != nil {
+			return fmt.Errorf("could not connect to database: %v", err)
+		}
+
 		s, err = discordgo.New("Bot " + token)
 		if err != nil {
-			log.Fatalf("Invalid bot parameters: %v", err)
+			return fmt.Errorf("invalid bot parameters: %v", err)
 		}
 
-		s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			if h, ok := bot.CommandHandlers[i.Data.Name]; ok {
-				h(s, i)
-			}
-		})
+		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-			klog.Infof("Bot is up!")
-		})
-		err := s.Open()
-		if err != nil {
-			klog.Fatalf("Cannot open the session: %v", err)
-		}
 
-		defer s.Close()
-
-		if err := registerCommands(); err != nil {
-			klog.Error(err)
+		server := bot.Server{
+			Session:       s,
+			CleanUpOnExit: cleanupOnExit,
 		}
-		stop := make(chan os.Signal)
-		signal.Notify(stop, os.Interrupt)
-		<-stop
-		klog.Info("Gracefully shutting down...")
-		if cleanupOnExit {
-			if err := removeAllCommands(); err != nil {
-				klog.Error(err)
-			}
+		if err := server.Run(); err != nil {
+			klog.Fatal(err)
 		}
 	},
-}
-
-func registerCommands() error {
-	klog.Info("registering commands")
-	for _, v := range bot.Commands {
-		_, err := s.ApplicationCommandCreate(s.State.User.ID, guild, v)
-		if err != nil {
-			return fmt.Errorf("Cannot create '%v' command: %v", v.Name, err)
-		}
-	}
-	return nil
-}
-
-func removeAllCommands() error {
-	klog.Info("deleting all commands")
-	commands, err := s.ApplicationCommands(s.State.User.ID, guild)
-	if err != nil {
-		return err
-	}
-
-	for _, c := range commands {
-		klog.Infof("deleting command %s", c.Name)
-		err := s.ApplicationCommandDelete(s.State.User.ID, guild, c.ID)
-		if err != nil {
-			klog.Errorf("Cannot delete '%v' command: %v", c.Name, err)
-		}
-	}
-
-	return nil
 }
