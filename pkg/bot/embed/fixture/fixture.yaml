@@ -1,0 +1,5 @@
+- model: Team
+  rows:
+    - discord_role_id: 1234
+      team_name: fightingpenguins
+

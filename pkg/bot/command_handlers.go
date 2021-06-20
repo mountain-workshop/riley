@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"strconv"
 
+	"git.iratepublik.com/sudermans/discord-house-cup/pkg/model"
 	"github.com/bwmarrin/discordgo"
 	"k8s.io/klog"
 )
 
-var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, app *App){
 	"help":          helpHandler,
 	"register-team": registerTeamHandler,
 }
 
-func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
 	klog.V(4).Info("handling register-team")
 
 	teamID, err := strconv.ParseUint(i.Data.Options[0].RoleValue(nil, "").ID, 10, 64)
@@ -45,10 +46,14 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			),
 		},
 	})
-	registerTeam(teamName, teamID)
+
+	app.DB().NewInsert().Model(&model.Team{
+		TeamName:      teamName,
+		DiscordRoleID: teamID,
+	}).Exec(app.ctx)
 }
 
-func helpHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func helpHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
 	klog.V(4).Info("handling help interaction")
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

@@ -1,7 +1,3 @@
-DROP VIEW IF EXISTS team_total;
-DROP TABLE IF EXISTS points_log;
-DROP TABLE IF EXISTS team;
-
 CREATE TABLE team (
   discord_role_id bigint PRIMARY KEY not null,
   team_name text not null,

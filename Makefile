@@ -26,12 +26,6 @@ clean:
 	$(GOCLEAN)
 	$(GOCMD) fmt ./...
 	rm -f $(BINARY_NAME)
-# Cross compilation
-build-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v
-build-docker:
-	docker build --build-arg version=$(VERSION) --build-arg commit=$(COMMIT) -t quay.io/sudermanjr/$(BINARY_NAME):dev .
-run-docker:
-	docker run --rm -p 4004:4004 --env DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} --env DISCORD_GUILD_ID=${DISCORD_GUILD_ID} quay.io/sudermanjr/$(BINARY_NAME):dev server
-run:
-	go run main.go server --token ${DISCORD_BOT_TOKEN} --guild ${DISCORD_GUILD_ID} -v10 -c
+run-dev:
+	docker stop dev-postgres 2>/dev/null || true
+	docker run --rm -itd -p 5432:5432 --name dev-postgres --env TZ=America/Denver --env POSTGRES_PASSWORD=test --env POSTGRES_DB=test postgres:12

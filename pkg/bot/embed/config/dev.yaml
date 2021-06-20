@@ -1,0 +1,4 @@
+debug: true
+
+db:
+  dsn: 'postgres://postgres:test@localhost:5432/test?sslmode=disable'
