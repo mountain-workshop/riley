@@ -1,3 +1,0 @@
-DROP VIEW IF EXISTS team_total;
-DROP TABLE IF EXISTS points_log;
-DROP TABLE IF EXISTS team;

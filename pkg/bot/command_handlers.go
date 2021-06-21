@@ -30,10 +30,8 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, a
 	msgformat := " We are going to register this team:\n"
 	msgformat += "> role-id: <@&%s>\n"
 
-	var teamName string
 	if len(i.Data.Options) >= 2 {
 		margs = append(margs, i.Data.Options[1].ChannelValue(nil).ID)
-		teamName = i.Data.Options[1].ChannelValue(nil).ID
 		msgformat += "> team-name: %s\n"
 	}
 
@@ -48,7 +46,6 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, a
 	})
 
 	app.DB().NewInsert().Model(&model.Team{
-		TeamName:      teamName,
 		DiscordRoleID: teamID,
 	}).Exec(app.ctx)
 }

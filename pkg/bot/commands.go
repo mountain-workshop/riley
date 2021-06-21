@@ -22,12 +22,6 @@ var registerTeamCommand = discordgo.ApplicationCommand{
 			Description: "The role to associate with this team",
 			Required:    true,
 		},
-		{
-			Type:        discordgo.ApplicationCommandOptionString,
-			Name:        "team-name",
-			Description: "Team name if using a different name than the role",
-			Required:    false,
-		},
 	},
 }
 
