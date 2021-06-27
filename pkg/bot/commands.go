@@ -7,33 +7,16 @@ import (
 	"k8s.io/klog"
 )
 
-var helpCommand = discordgo.ApplicationCommand{
-	Name:        "help",
-	Description: "Help Command",
-}
-
-var registerTeamCommand = discordgo.ApplicationCommand{
-	Name:        "register-team",
-	Description: "Registers a Discord Role as a Team in the tracker",
-	Options: []*discordgo.ApplicationCommandOption{
-		{
-			Type:        discordgo.ApplicationCommandOptionRole,
-			Name:        "discord-role",
-			Description: "The role to associate with this team",
-			Required:    true,
-		},
-	},
-}
-
-var listTeamCommand = discordgo.ApplicationCommand{
-	Name:        "list-teams",
-	Description: "List all roles associated with teams in the tracker",
-}
-
 var commands = []*discordgo.ApplicationCommand{
 	&helpCommand,
 	&registerTeamCommand,
 	&listTeamCommand,
+}
+
+var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, app *App){
+	"help":          helpHandler,
+	"register-team": registerTeamHandler,
+	"list-teams":    listTeamHandler,
 }
 
 func (app *App) registerCommands() error {
@@ -64,4 +47,17 @@ func (app *App) removeAllCommands() error {
 	}
 
 	return nil
+}
+
+func respond(s *discordgo.Session, i *discordgo.Interaction, response string) {
+	err := s.InteractionRespond(i, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: response,
+		},
+	})
+
+	if err != nil {
+		klog.Error(err)
+	}
 }

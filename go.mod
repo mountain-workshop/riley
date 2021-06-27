@@ -5,7 +5,9 @@ go 1.16
 require (
 	github.com/bwmarrin/discordgo v0.23.3-0.20210505230645-3fcad209243f
 	github.com/jackc/pgx/v4 v4.11.0
+	github.com/stretchr/testify v1.7.0
 	github.com/uptrace/bun v0.2.10
+	github.com/uptrace/bun/dbfixture v0.2.10
 	github.com/uptrace/bun/dialect/pgdialect v0.2.10
 	github.com/uptrace/bun/extra/bundebug v0.2.10
 	github.com/urfave/cli/v2 v2.3.0

@@ -1,0 +1,43 @@
+name: test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41
+
+  test:
+    name: "test"
+    runs-on: ubuntu-latest
+    container: golang:1.16
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: test
+          TZ: America/Denver
+          POSTGRES_DB: test
+          POSTGRES_PORT: 5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Tests
+        run: |
+          go run cmd/root/main.go -env test db init
+          go run cmd/root/main.go -env test db migrate
+          go test -v --bench --benchmem -coverprofile coverage.txt -covermode=atomic ./... -args -env test
