@@ -23,17 +23,18 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, a
 		return
 	}
 
+	guildID, err := strconv.ParseUint(i.Interaction.GuildID, 10, 64)
+	if err != nil {
+		klog.Error(err)
+		return
+	}
+
 	margs := []interface{}{
 		i.Data.Options[0].RoleValue(nil, "").ID,
 	}
 
 	msgformat := " We are going to register this team:\n"
 	msgformat += "> role-id: <@&%s>\n"
-
-	if len(i.Data.Options) >= 2 {
-		margs = append(margs, i.Data.Options[1].ChannelValue(nil).ID)
-		msgformat += "> team-name: %s\n"
-	}
 
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -45,9 +46,14 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, a
 		},
 	})
 
-	app.DB().NewInsert().Model(&model.Team{
-		DiscordRoleID: teamID,
+	_, err = app.DB().NewInsert().Model(&model.Team{
+		DiscordRoleID:  teamID,
+		DiscordGuildID: guildID,
 	}).Exec(app.ctx)
+	if err != nil {
+		klog.Error(err)
+		return
+	}
 }
 
 func helpHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
