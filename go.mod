@@ -3,7 +3,7 @@ module github.com/mountain-workshop/riley
 go 1.16
 
 require (
-	github.com/bwmarrin/discordgo v0.23.2
+	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/uptrace/bun v0.2.10
 	github.com/uptrace/bun/dialect/pgdialect v0.2.10
