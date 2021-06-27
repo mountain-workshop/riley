@@ -45,6 +45,8 @@ github.com/bwmarrin/discordgo v0.23.1 h1:xlK4/69bpl/VSoCYaKe3BOc9j1HkNopoRdCppRY
 github.com/bwmarrin/discordgo v0.23.1/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
 github.com/bwmarrin/discordgo v0.23.2 h1:BzrtTktixGHIu9Tt7dEE6diysEF9HWnXeHuoJEt2fH4=
 github.com/bwmarrin/discordgo v0.23.2/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
+github.com/bwmarrin/discordgo v0.23.3-0.20210505230645-3fcad209243f h1:Nq8bnQUMz4i4EDYO/AahsUbVt8nE/A9ZLK1Nv74QrbE=
+github.com/bwmarrin/discordgo v0.23.3-0.20210505230645-3fcad209243f/go.mod h1:OMKxbTmkKofBjBi4/yidO3ItxbJ6PUfEUkjchM4En8c=
 github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030 h1:JgAlPJlCqsrUqXcClndnvF6LOjV528hpU/l5YzN++PA=
 github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/casbin/casbin/v2 v2.1.2/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
