@@ -55,6 +55,8 @@ func listTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *
 	if err != nil {
 		klog.Error(err)
 		returnMessage = " An unexpected error occurred getting your guild id"
+		respond(s, i.Interaction, returnMessage)
+		return
 	}
 
 	teams, err := app.listTeams(guildID)
