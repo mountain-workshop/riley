@@ -1,6 +1,6 @@
 apiVersion: v2
-name: discord-house-cup
-description: A Helm chart to run the discord house cup bot
+name: riley
+description: A Helm chart to run Riley - The Discord house cup points tracker
 
 # A chart can be either an 'application' or a 'library' chart.
 #

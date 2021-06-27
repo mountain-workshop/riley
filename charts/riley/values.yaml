@@ -1,11 +1,11 @@
-# Default values for discord-house-cup.
+# Default values for riley.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: quay.io/sudermanjr/discord-house-cup
+  repository: quay.io/sudermanjr/riley
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

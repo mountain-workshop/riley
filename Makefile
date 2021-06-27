@@ -3,14 +3,14 @@ GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
-BINARY_NAME=discord-house-cup
+BINARY_NAME=riley
 COMMIT := $(shell git rev-parse HEAD)
 VERSION := "local-dev"
 
 all: lint test
 docker: build-docker run-docker
 build:
-	$(GOBUILD) -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v
+	$(GOBUILD) -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v cmd/root/main.go
 lint:
 	golangci-lint run
 reportcard:

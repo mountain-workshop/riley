@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"git.iratepublik.com/sudermans/discord-house-cup/cmd/bun/migrations"
-	"git.iratepublik.com/sudermans/discord-house-cup/pkg/bot"
+	"github.com/mountain-workshop/riley/cmd/root/migrations"
+	"github.com/mountain-workshop/riley/pkg/bot"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
 	"k8s.io/klog"

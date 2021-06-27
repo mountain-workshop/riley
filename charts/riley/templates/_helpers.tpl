@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "discord-house-cup.name" -}}
+{{- define "riley.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "discord-house-cup.fullname" -}}
+{{- define "riley.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "discord-house-cup.chart" -}}
+{{- define "riley.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "discord-house-cup.labels" -}}
-helm.sh/chart: {{ include "discord-house-cup.chart" . }}
-{{ include "discord-house-cup.selectorLabels" . }}
+{{- define "riley.labels" -}}
+helm.sh/chart: {{ include "riley.chart" . }}
+{{ include "riley.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "discord-house-cup.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "discord-house-cup.name" . }}
+{{- define "riley.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "riley.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "discord-house-cup.serviceAccountName" -}}
+{{- define "riley.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "discord-house-cup.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "riley.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

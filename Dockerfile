@@ -1,5 +1,5 @@
 FROM golang:1.16 AS build-env
-WORKDIR /go/src/git.iratepublik.com/discord-house-cup/
+WORKDIR /go/src/github.com/mountain-workshop/riley
 
 ARG version=dev
 ARG commit=none
@@ -14,6 +14,6 @@ RUN VERSION=$version COMMIT=$commit make build-linux
 FROM alpine:3.13
 
 USER nobody
-COPY --from=build-env /go/src/git.iratepublik.com/discord-house-cup/discord-house-cup /
+COPY --from=build-env /go/src/github.com/mountain-workshop/riley /riley
 
-ENTRYPOINT ["/discord-house-cup"]
+ENTRYPOINT ["/riley"]
