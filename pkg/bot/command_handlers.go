@@ -3,10 +3,8 @@ package bot
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/mountain-workshop/riley/pkg/model"
 	"k8s.io/klog"
 )
 
@@ -19,7 +17,7 @@ var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
 	klog.V(4).Info("handling register-team")
 
-	teamID, err := strconv.ParseUint(i.Data.Options[0].RoleValue(nil, "").ID, 10, 64)
+	roleID, err := strconv.ParseUint(i.Data.Options[0].RoleValue(nil, "").ID, 10, 64)
 	if err != nil {
 		klog.Error(err)
 		return
@@ -37,30 +35,16 @@ func registerTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, a
 
 	var msgFormat string
 
-	_, err = app.DB().NewInsert().Model(&model.Team{
-		DiscordRoleID:  teamID,
-		DiscordGuildID: guildID,
-	}).Exec(app.ctx)
-	if err != nil {
-		klog.Error(err)
-		if strings.Contains(err.Error(), "23505") {
-			msgFormat = " Team <@&%s> already exists"
-		} else {
-			msgFormat = " Unknown error registering team <@&%s>"
-		}
+	_, exists, err := app.createTeam(guildID, roleID)
+	if exists {
+		msgFormat = " Team <@&%s> is already registered"
+	} else if err != nil {
+		msgFormat = " Unknown error registering team <@&%s>"
 	} else {
 		msgFormat = " Team <@&%s> successfully registered\n"
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
-			Content: fmt.Sprintf(
-				msgFormat,
-				margs...,
-			),
-		},
-	})
+	respond(s, i.Interaction, fmt.Sprintf(msgFormat, margs...))
 }
 
 func listTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
@@ -73,23 +57,22 @@ func listTeamHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *
 		returnMessage = " An unexpected error occurred getting your guild id"
 	}
 
-	teams := make([]model.Team, 0)
-	if err := app.DB().NewSelect().Model(&teams).Where("discord_guild_id = ?", guildID).Scan(app.ctx); err != nil {
+	teams, err := app.listTeams(guildID)
+	if err != nil {
 		klog.Error(err)
 		returnMessage = " An unexpected error occurred listing teams"
 	} else {
-		returnMessage = "Here are the currently registered teams:\n"
-		for _, team := range teams {
-			returnMessage = returnMessage + fmt.Sprintf("    <@&%d>\n", team.DiscordRoleID)
+		if len(teams) < 1 {
+			returnMessage = "There are no teams registered"
+		} else {
+			returnMessage = "Here are the currently registered teams:\n"
+			for _, team := range teams {
+				returnMessage = returnMessage + fmt.Sprintf("    <@&%d>\n", team.DiscordRoleID)
+			}
 		}
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
-			Content: returnMessage,
-		},
-	})
+	respond(s, i.Interaction, returnMessage)
 }
 
 func helpHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App) {
@@ -102,10 +85,18 @@ func helpHandler(s *discordgo.Session, i *discordgo.InteractionCreate, app *App)
 		helpText = helpText + fmt.Sprintf("    /%s - %s\n", cmd.Name, cmd.Description)
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	respond(s, i.Interaction, helpText)
+}
+
+func respond(s *discordgo.Session, i *discordgo.Interaction, response string) {
+	err := s.InteractionRespond(i, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionApplicationCommandResponseData{
-			Content: helpText,
+			Content: response,
 		},
 	})
+
+	if err != nil {
+		klog.Error(err)
+	}
 }

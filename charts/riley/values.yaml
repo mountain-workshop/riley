@@ -41,18 +41,12 @@ service:
   port: 80
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     kubernetes.io/ingress.class: nginx-ingress
     cert-manager.io/cluster-issuer: letsencrypt-prod
-  hosts:
-    - host: dhc.iratepublik.com
-      paths:
-        - path: "/"
-  tls:
-  - secretName: dhc-tls
-    hosts:
-      - dhc.iratepublik.com
+  hosts: []
+  tls: []
 
 resources:
   limits:
