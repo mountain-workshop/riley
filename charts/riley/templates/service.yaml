@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "discord-house-cup.fullname" . }}
+  name: {{ include "riley.fullname" . }}
   labels:
-    {{- include "discord-house-cup.labels" . | nindent 4 }}
+    {{- include "riley.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "discord-house-cup.selectorLabels" . | nindent 4 }}
+    {{- include "riley.selectorLabels" . | nindent 4 }}

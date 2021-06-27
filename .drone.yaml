@@ -12,7 +12,7 @@ steps:
       from_secret: quay_user
     password:
       from_secret: quay_token
-    repo: quay.io/sudermanjr/discord-house-cup
+    repo: quay.io/sudermanjr/riley
     tags:
       - ${DRONE_TAG}
       - ${DRONE_COMMIT_SHA}
@@ -35,7 +35,7 @@ steps:
 - name: helm-lint
   image: quay.io/sudermanjr/utilities:2.0
   commands:
-  - helm lint charts/discord-house-cup --strict
+  - helm lint charts/riley --strict
   when:
     branch:
       exclude:
@@ -59,7 +59,7 @@ steps:
 - name: helm-deploy
   image: quay.io/sudermanjr/utilities:2.0
   commands:
-  - helm upgrade --install discord-house-cup charts/discord-house-cup --namespace dhc --create-namespace --set image.tag=${DRONE_COMMIT_SHA}
+  - helm upgrade --install riley charts/riley --namespace dhc --create-namespace --set image.tag=${DRONE_COMMIT_SHA}
   when:
     ref:
     - refs/tags/*
