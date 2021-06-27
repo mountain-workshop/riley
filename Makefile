@@ -10,7 +10,7 @@ VERSION := "local-dev"
 all: lint test
 docker: build-docker run-docker
 build:
-	$(GOBUILD) cmd/main.go -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v
+	$(GOBUILD) -o $(BINARY_NAME) -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -s -w" -v cmd/root/main.go
 lint:
 	golangci-lint run
 reportcard:

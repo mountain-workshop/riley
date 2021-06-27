@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mountain-workshop/riley/cmd/bun/migrations"
+	"github.com/mountain-workshop/riley/cmd/root/migrations"
 	"github.com/mountain-workshop/riley/pkg/bot"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
