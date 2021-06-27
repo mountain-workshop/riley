@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"git.iratepublik.com/sudermans/discord-house-cup/pkg/model"
 	"github.com/bwmarrin/discordgo"
+	"github.com/mountain-workshop/riley/pkg/model"
 	"k8s.io/klog"
 )
 
