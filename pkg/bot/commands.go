@@ -14,7 +14,7 @@ var helpCommand = discordgo.ApplicationCommand{
 
 var registerTeamCommand = discordgo.ApplicationCommand{
 	Name:        "register-team",
-	Description: "Command for associating a team with a Discord Role",
+	Description: "Registers a Discord Role as a Team in the tracker",
 	Options: []*discordgo.ApplicationCommandOption{
 		{
 			Type:        discordgo.ApplicationCommandOptionRole,
@@ -25,9 +25,15 @@ var registerTeamCommand = discordgo.ApplicationCommand{
 	},
 }
 
+var listTeamCommand = discordgo.ApplicationCommand{
+	Name:        "list-teams",
+	Description: "List all roles associated with teams in the tracker",
+}
+
 var commands = []*discordgo.ApplicationCommand{
 	&helpCommand,
 	&registerTeamCommand,
+	&listTeamCommand,
 }
 
 func (app *App) registerCommands() error {
