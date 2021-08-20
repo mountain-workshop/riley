@@ -1,4 +1,4 @@
-package model
+package bot
 
 import (
 	"time"
@@ -100,16 +100,6 @@ type TaskType struct {
 	ParentTaskTypeID uint64    `bun:",nullzero"`
 	ParentTaskType   *TaskType `bun:"rel:belongs-to,join:discord_guild_id=discord_guild_id,parent_task_type_id=task_type_id"`
 	Task             []*Task   `bun:"rel:has-many,join:discord_guild_id=discord_guild-id,task_id=task_id"`
-}
-
-type Team struct {
-	bun.BaseModel  `bun:"team"`
-	DiscordGuildID uint64         `bun:",pk,notnull"`
-	TeamID         uint32         `bun:",pk,nullzero,notnull,default:'unknown'"`
-	DiscordRoleID  uint64         `bun:",notnull"`
-	LeagueID       uint32         `bun:",nullzero"`
-	League         *League        `bun:"rel:belongs-to,join:discord_guild_id=discord_guild_id,league_id=league_id"`
-	LedgerEntry    []*LedgerEntry `bun:"rel:has-many,join:discord_guild_id=discord_guild_id,team_id=team_id"`
 }
 
 type TeamPointTotal struct {

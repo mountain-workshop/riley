@@ -13,7 +13,7 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name: "bot",
+		Name: "riley",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "env",

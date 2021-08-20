@@ -1,0 +1,9 @@
+- model: Team
+  rows:
+    - _id: one
+      discord_role_id: 1
+      discord_guild_id: 1
+    - _id: two
+      discord_role_id: 2
+      discord_guild_id: 2
+
